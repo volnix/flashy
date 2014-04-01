@@ -1,0 +1,29 @@
+{
+	"name": "volnix/flashy",
+	"description": "A wrapper around Symfony's HTTP foundation session flashbag to handle messages and form flash data",
+	"homepage": "https://github.com/volnix/flashy",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Nick Volgas",
+			"email": "n.volgas@gmail.com"
+		}
+	],
+	"autoload":{
+		"psr-4":{
+			"Volnix\\Flashy\\": "src/",
+			"Volnix\\Flashy\\Tests\\": "tests/"
+		}
+	},
+
+	"require": {
+		"php": ">= 5.4",
+		"symfony/http-foundation": "2.5.*@dev"
+	},
+
+	"require-dev": {
+		"phpunit/phpunit": "3.7.*"
+	},
+
+	"minimum-stability": "dev"
+}
