@@ -36,11 +36,11 @@ class Messages {
 		$message_class = !empty($classes[$type]) ? $classes[$type] : sprintf('alert alert-%s', htmlspecialchars($type));
 		
 		if (is_array($this->getMessages($type)) && count($this->getMessages($type)) > 0) {
-			$message_content = sprintf('<ul class="%s">', $message_class);
+			$message_content = sprintf('<div class="%s"><ul>', $message_class);
 			foreach ($this->getMessages($type) as $message) {
 				$message_content .= sprintf('<li>%s</li>', $message);
 			}
-			$message_content .= sprintf('</ul>', $message_class);
+			$message_content .= sprintf('</ul></div>', $message_class);
 			return $message_content;
 		} elseif (is_array($this->getMessages()) && count($this->getMessages()) > 0) {
 			// iterate through the message types, calling this function recursively
