@@ -33,20 +33,24 @@ class Messages {
 	 */
 	public function getFormattedMessages($type = "", $classes = [])
 	{
-		$message_class = !empty($classes[$type]) ? $classes[$type] : sprintf('alert alert-%s', htmlspecialchars($type));
+		$message_class = !empty($classes[$type]) ? $classes[$type] : sprintf('alert alert-%s', ($type == 'error' ? 'danger' : htmlspecialchars($type)));
 		
-		if (is_array($this->getMessages($type)) && count($this->getMessages($type)) > 0) {
-			$message_content = sprintf('<div class="%s"><ul>', $message_class);
-			foreach ($this->getMessages($type) as $message) {
-				$message_content .= sprintf('<li>%s</li>', $message);
-			}
-			$message_content .= sprintf('</ul></div>', $message_class);
+		if (!empty($type) && is_array($this->getMessages($type)) && count($this->getMessages($type)) > 0) {
+			
+			$message_content = sprintf('<div class="%s">', $message_class);
+			$message_content .= $this->makeUl($this->getMessages($type));
+			$message_content .= '</div>';
 			return $message_content;
-		} elseif (is_array($this->getMessages()) && count($this->getMessages()) > 0) {
+			
+		} elseif (empty($type) && is_array($this->getMessages()) && count($this->getMessages()) > 0) {
+			
 			// iterate through the message types, calling this function recursively
+			$messages = "";
 			foreach (array_keys($this->getMessages()) as $msg_type) {
-				return $this->getFormattedMessages($msg_type);
+				$messages .= $this->getFormattedMessages($msg_type);
 			}
+			return $messages;
+			
 		} else {
 			return "";
 		}
@@ -127,6 +131,23 @@ class Messages {
 	private function saveMessages()
 	{
 		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->messages);
+	}
+	
+	
+	private function makeUl($data = [])
+	{
+		$ul = '<ul>';
+		foreach ($data as $header => $message) {
+			if (is_string($message)) {
+				// simple string, so stick in tags and rock n roll
+				$ul .= sprintf('<li>%s</li>', $message);
+			} elseif (is_array($message)) {
+				// array, so call recursively
+				$ul .= sprintf('<li>%s%s</li>', $header, $this->makeUl($message));
+			}
+		}
+		$ul .= '</ul>';
+		return $ul;
 	}
 	
 	/**
