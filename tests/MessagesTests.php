@@ -15,9 +15,17 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 	
 	public function __construct()
 	{
-		$this->resetSession();
+		ob_start();
+	}
+	
+	public function __destruct()
+	{
+		echo ob_get_clean();
+	}
+	
+	public function setUp()
+	{
 		$this->messages = new Messages();
-		$this->messages->setSession($this->session);
 	}
 	
 	public function tearDown()
@@ -30,14 +38,6 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 	{
 		$data = ['error' => 'foo'];
 		$this->messages->setAsArray($data);
-		$this->assertTrue(is_array($this->messages->get('error')));
-		$this->assertEquals('foo', $this->messages->get('error')[0]);
-	}
-	
-	public function testGetSetConstructor()
-	{
-		$data = ['error' => 'foo'];
-		$this->messages = new Messages($data);
 		$this->assertTrue(is_array($this->messages->get('error')));
 		$this->assertEquals('foo', $this->messages->get('error')[0]);
 	}
@@ -161,12 +161,5 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		
 		$this->assertTrue(is_string($this->messages->getFormatted('error')));
 		$this->assertEquals('<div class="alert alert-danger"><ul><li>foo</li><li>bar</li><li>baz<ul><li>bip</li><li>bap</li><li>bop</li></ul></li></ul></div>', $this->messages->getFormatted('error'));
-	}
-	
-	private function resetSession($sess_id = NULL)
-	{
-		$this->session = null; unset($this->session);
-		$this->session = new Session(new MockFileSessionStorage(), null, new AutoExpireFlashBag());
-		$this->session->setId($sess_id);
 	}
 }

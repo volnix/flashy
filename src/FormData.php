@@ -9,22 +9,14 @@ use \InvalidArgumentException;
 class FormData {
 	
 	public $session	= null;
-	private $flash	= null;
+	private $flash_data	= [];
 	
 	const SESSION_INDEX		= "_flashy_form_data";
 	
-	public function __construct($data = [])
+	public function __construct($session = null)
 	{
-		$this->setSession();
-		
-		if (is_array($data)) {
-			$this->set($data);
-		}
-	}
-	
-	public function __destruct()
-	{
-		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->flash_data);
+		$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
+		$this->flash_data = $this->session->getFlashBag()->get(self::SESSION_INDEX);
 	}
 	
 	/**
@@ -68,28 +60,6 @@ class FormData {
 		}
 		
 		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->flash_data);
-	}
-	
-	/**
-	 * Set a new session to our form data object.  This is primarily used for unit testing.
-	 * 
-	 * @access public
-	 * @param SessionInterface $session (default: null)
-	 * @return void
-	 */
-	public function setSession(SessionInterface $session = null)
-	{
-		$this->session = null; unset($this->session);
-		
-		if (isset($session_storage) && !$session_storage instanceof SessionInterface) {
-			throw new InvalidArgumentException(sprintf("You must pass in an instance of SessionInterface.  You gave me a '%s'.", gettype($session_storage)));
-		} elseif (isset($session_storage)) {
-			$this->session = $session;
-		} else {
-			$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
-		}
-		
-		$this->flash_data = $this->session->getFlashBag()->get(self::SESSION_INDEX);
 	}
 	
 	/**

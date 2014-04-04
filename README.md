@@ -47,18 +47,6 @@ $form_data->clear();
 echo $form_data->get('foo', 'baz'); // baz
 ```
 
-Finally, the constructor of the FormData class accepts a Symfony `SessionInterface` as its only argument.  This was done for unit testing purposes, but can be used if desired.
-
-```php
-use Volnix\Flashy\FormData;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\Flash\AutoExpireFlashBag;
-use Symfony\Component\HttpFoundation\Session\Storage\MockFileSessionStorage;
-
-$session = new Session(new MockFileSessionStorage(), null, new AutoExpireFlashBag());
-$form_data = new FormData($session);
-```
-
 ## <a name="messages"></a>Messages
 
 The Messages class will make handling flash messages a breeze.  It is loosely tied to [Bootstrap 3](http://getbootstrap.com/) for its alert markup, but this can easily be overridden.  It is also using Symfony's [AutoExpireFlashBag](http://api.symfony.com/2.4/Symfony/Component/HttpFoundation/Session/Flash/AutoExpireFlashBag.html) container.

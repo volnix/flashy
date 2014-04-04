@@ -13,15 +13,10 @@ class Messages {
 	
 	const SESSION_INDEX		= "_flashy_messages";
 	
-	public function __construct($data = [])
+	public function __construct()
 	{
-		$this->setSession();
-		$this->setAsArray($data);
-	}
-	
-	public function __destruct()
-	{
-		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->messages);
+		$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
+		$this->messages = $this->session->getFlashBag()->get(self::SESSION_INDEX);
 	}
 	
 	/**
@@ -94,6 +89,8 @@ class Messages {
 		} else {
 			throw new InvalidArgumentException(sprintf("Message must be an array or string.  '%s' given.", gettype($message)));
 		}
+		
+		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->messages);
 	}
 	
 	/**
@@ -121,28 +118,6 @@ class Messages {
 	public function clear()
 	{
 		$this->messages = [];
-	}
-	
-	/**
-	 * Set a new session to our form data object.  This is primarily used for unit testing.
-	 * 
-	 * @access public
-	 * @param SessionInterface $session (default: null)
-	 * @return void
-	 */
-	public function setSession(SessionInterface $session = null)
-	{
-		$this->session = null; unset($this->session);
-		
-		if (isset($session_storage) && !$session_storage instanceof SessionInterface) {
-			throw new InvalidArgumentException(sprintf("You must pass in an instance of SessionInterface.  You gave me a '%s'.", gettype($session_storage)));
-		} elseif (isset($session_storage)) {
-			$this->session = $session;
-		} else {
-			$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
-		}
-		
-		$this->messages = $this->session->getFlashBag()->get(self::SESSION_INDEX);
 	}
 	
 	/**
