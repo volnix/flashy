@@ -13,14 +13,18 @@ class FormData {
 	
 	const SESSION_INDEX		= "_flashy_form_data";
 	
-	public function __construct($session = null)
+	public function __construct($data = [])
 	{
-		$this->setSession($session);
+		$this->setSession();
+		
+		if (is_array($data)) {
+			$this->set($data);
+		}
 	}
 	
 	public function __destruct()
 	{
-		$this->saveFlashData();
+		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->flash_data);
 	}
 	
 	/**
@@ -31,7 +35,7 @@ class FormData {
 	 * @param string $default (default: "")
 	 * @return void
 	 */
-	public function setValue($key = "", $default = "")
+	public function get($key = "", $default = "")
 	{
 		// no key, so return all the flash data
 		if (empty($key)) {
@@ -53,7 +57,7 @@ class FormData {
 	 * @param mixed $data (default: "")
 	 * @return void
 	 */
-	public function setFormData($key, $data = "")
+	public function set($key, $data = "")
 	{
 		if (is_array($key)) {
 			$this->flash_data = $key;
@@ -63,7 +67,7 @@ class FormData {
 			throw new InvalidArgumentException(sprintf("Message must be an array or string.  '%s' given.", gettype($message)));
 		}
 		
-		$this->saveFlashData();
+		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->flash_data);
 	}
 	
 	/**
@@ -89,24 +93,13 @@ class FormData {
 	}
 	
 	/**
-	 * Empty our form data.  This is primarily used for unit testing.
+	 * Clear our form data.  This is primarily used for unit testing.
 	 * 
 	 * @access public
 	 * @return void
 	 */
-	public function emptyFormData()
+	public function clear()
 	{
-		$this->setFormData([]);
-	}
-	
-	/**
-	 * Write the form data to the session.
-	 * 
-	 * @access public
-	 * @return void
-	 */
-	private function saveFlashData()
-	{
-		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->flash_data);
+		$this->set([]);
 	}
 }

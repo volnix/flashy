@@ -13,50 +13,53 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 	
 	public function __construct()
 	{
-		$this->setSession();
-		$this->form_data = new FormData($this->session);
+		$this->resetSession();
+		$this->form_data = new FormData;
+		$this->form_data->setSession($this->session);
 	}
 	
 	public function tearDown()
 	{
 		// wipe our form data so we have a fresh object to work with
-		$this->form_data->emptyFormData();
+		$this->form_data->clear();
+	}
+	
+	public function testSetFormDataConstructor()
+	{
+		$data = ['foo' => 'bar'];
+		$this->form_data = new FormData($data);
+		$this->assertEquals('bar', $this->form_data->get('foo'));
 	}
 	
 	public function testSetFormDataSetValue()
 	{
 		$data = ['foo' => 'bar'];
-		$this->form_data->setFormData($data);
+		$this->form_data->set($data);
 		
-		// get our session id so we can set it after we kill off our session
-		$sess_id = $this->form_data->session->getId();
-		
-		// kill our session, then rebuild it and assign our old session ID to it to simulate an http request lifecycle
-		$this->form_data->setSession($this->session);
-		
-		$this->assertEquals('bar', $this->form_data->setValue('foo'));
+		$this->assertEquals('bar', $this->form_data->get('foo'));
 	}
 	
 	public function testSetFormDataSetValueMultiRequest()
 	{
 		$data = ['foo' => 'bar'];
-		$this->form_data->setFormData($data);
-		
-		// get our session id so we can set it after we kill off our session
-		$sess_id = $this->form_data->session->getId();
+		$this->form_data->set($data);
 		
 		// kill our session, then rebuild it and assign our old session ID to it to simulate an http request lifecycle
+		$sess_id = $this->form_data->session->getId();
+		$this->resetSession($sess_id);
 		$this->form_data->setSession($this->session);
-		$this->assertEquals('bar', $this->form_data->setValue('foo'));
+		$this->assertEquals('bar', $this->form_data->get('foo'));
 		
 		// kill our session again without a set.  this should not have 'bar' as the value this time
+		$sess_id = $this->form_data->session->getId();
+		$this->resetSession($sess_id);
 		$this->form_data->setSession($this->session);
 		
-		$this->assertNotEquals('bar', $this->form_data->setValue('foo'));
-		$this->assertEquals("", $this->form_data->setValue('foo'));
+		$this->assertNotEquals('bar', $this->form_data->get('foo'));
+		$this->assertEquals("", $this->form_data->get('foo'));
 	}
 	
-	private function setSession($sess_id = NULL)
+	private function resetSession($sess_id = NULL)
 	{
 		$this->session = null; unset($this->session);
 		$this->session = new Session(new MockFileSessionStorage(), null, new AutoExpireFlashBag());

@@ -15,37 +15,54 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 	
 	public function __construct()
 	{
-		$this->setSession();
-		$this->messages = new Messages($this->session);
+		$this->resetSession();
+		$this->messages = new Messages();
+		$this->messages->setSession($this->session);
 	}
 	
 	public function tearDown()
 	{
 		// wipe our form data so we have a fresh object to work with
-		$this->messages->emptyMessages();
+		$this->messages->clear();
 	}
 	
-	public function testGetMessagesSimple()
+	public function testSetAsArray()
+	{
+		$data = ['error' => 'foo'];
+		$this->messages->setAsArray($data);
+		$this->assertTrue(is_array($this->messages->get('error')));
+		$this->assertEquals('foo', $this->messages->get('error')[0]);
+	}
+	
+	public function testGetSetConstructor()
+	{
+		$data = ['error' => 'foo'];
+		$this->messages = new Messages($data);
+		$this->assertTrue(is_array($this->messages->get('error')));
+		$this->assertEquals('foo', $this->messages->get('error')[0]);
+	}
+	
+	public function testSetSimple()
 	{
 		$messages = ['foo', 'bar', 'baz'];
 		$this->messages->error($messages);
 		
-		$this->assertTrue(is_array($this->messages->getMessages('error')));
-		$this->assertEquals('foo', $this->messages->getMessages('error')[0]);
-		$this->assertEquals('bar', $this->messages->getMessages('error')[1]);
-		$this->assertEquals('baz', $this->messages->getMessages('error')[2]);
+		$this->assertTrue(is_array($this->messages->get('error')));
+		$this->assertEquals('foo', $this->messages->get('error')[0]);
+		$this->assertEquals('bar', $this->messages->get('error')[1]);
+		$this->assertEquals('baz', $this->messages->get('error')[2]);
 	}
 	
-	public function testGetFormattedMessagesSimple()
+	public function testgetFormattedSimple()
 	{
 		$messages = ['foo', 'bar', 'baz'];
 		$this->messages->error($messages);
 		
-		$this->assertTrue(is_string($this->messages->getFormattedMessages('error')));
-		$this->assertRegExp('/alert alert\-danger/', $this->messages->getFormattedMessages('error'));
+		$this->assertTrue(is_string($this->messages->getFormatted('error')));
+		$this->assertRegExp('/alert alert\-danger/', $this->messages->getFormatted('error'));
 	}
 	
-	public function testGetMessagesComplex()
+	public function testgetComplex()
 	{
 		$messages = ['foo', 'bar', 'baz'];
 		$this->messages->error($messages);
@@ -53,14 +70,14 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		$messages = ['bip', 'bap', 'bop'];
 		$this->messages->info($messages);
 		
-		$this->assertTrue(is_array($this->messages->getMessages('error')));
-		$this->assertEquals('foo', $this->messages->getMessages('error')[0]);
+		$this->assertTrue(is_array($this->messages->get('error')));
+		$this->assertEquals('foo', $this->messages->get('error')[0]);
 		
-		$this->assertTrue(is_array($this->messages->getMessages('info')));
-		$this->assertEquals('bip', $this->messages->getMessages('info')[0]);
+		$this->assertTrue(is_array($this->messages->get('info')));
+		$this->assertEquals('bip', $this->messages->get('info')[0]);
 	}
 	
-	public function testGetFormattedMessagesComplex()
+	public function testgetFormattedComplex()
 	{
 		$messages = ['foo', 'bar', 'baz'];
 		$this->messages->error($messages);
@@ -68,22 +85,22 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		$messages = ['bip', 'bap', 'bop'];
 		$this->messages->info($messages);
 		
-		$this->assertTrue(is_string($this->messages->getFormattedMessages('error')));
-		$this->assertRegExp('/alert alert\-danger/', $this->messages->getFormattedMessages('error'));
-		$this->assertRegExp('/\<li\>foo\<\/li\>/', $this->messages->getFormattedMessages('error'));
+		$this->assertTrue(is_string($this->messages->getFormatted('error')));
+		$this->assertRegExp('/alert alert\-danger/', $this->messages->getFormatted('error'));
+		$this->assertRegExp('/\<li\>foo\<\/li\>/', $this->messages->getFormatted('error'));
 		
-		$this->assertTrue(is_string($this->messages->getFormattedMessages('info')));
-		$this->assertRegExp('/alert alert\-info/', $this->messages->getFormattedMessages('info'));
-		$this->assertRegExp('/\<li\>bop\<\/li\>/', $this->messages->getFormattedMessages('info'));
+		$this->assertTrue(is_string($this->messages->getFormatted('info')));
+		$this->assertRegExp('/alert alert\-info/', $this->messages->getFormatted('info'));
+		$this->assertRegExp('/\<li\>bop\<\/li\>/', $this->messages->getFormatted('info'));
 	}
 	
-	public function testGetFormattedMessagesSimpleClassOverride()
+	public function testgetFormattedSimpleClassOverride()
 	{
 		$messages = ['foo', 'bar', 'baz'];
 		$this->messages->error($messages);
 		
-		$this->assertTrue(is_string($this->messages->getFormattedMessages('error')));
-		$this->assertRegExp('/class\="bip"/', $this->messages->getFormattedMessages('error', ['error' => 'bip']));
+		$this->assertTrue(is_string($this->messages->getFormatted('error')));
+		$this->assertRegExp('/class\="bip"/', $this->messages->getFormatted('error', ['error' => 'bip']));
 	}
 	
 	public function testGetNonExistentMessageType()
@@ -91,11 +108,11 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		$messages = ['foo', 'bar', 'baz'];
 		$this->messages->error($messages);
 		
-		$this->assertTrue(is_array($this->messages->getMessages('bad_type')));
-		$this->assertEquals(0, count($this->messages->getMessages('bad_type')));
+		$this->assertTrue(is_array($this->messages->get('bad_type')));
+		$this->assertEquals(0, count($this->messages->get('bad_type')));
 		
-		$this->assertTrue(is_string($this->messages->getFormattedMessages('bip')));
-		$this->assertEquals("", $this->messages->getFormattedMessages('bip'));
+		$this->assertTrue(is_string($this->messages->getFormatted('bip')));
+		$this->assertEquals("", $this->messages->getFormatted('bip'));
 	}
 	
 	public function testGetAllMessages()
@@ -106,10 +123,10 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		$messages = ['bip', 'bap', 'bop'];
 		$this->messages->info($messages);
 		
-		$this->assertTrue(is_array($this->messages->getMessages()));
-		$this->assertEquals(2, count($this->messages->getMessages()));
-		$this->assertTrue(is_array($this->messages->getMessages()['info']));
-		$this->assertEquals(3, count($this->messages->getMessages()['info']));
+		$this->assertTrue(is_array($this->messages->get()));
+		$this->assertEquals(2, count($this->messages->get()));
+		$this->assertTrue(is_array($this->messages->get()['info']));
+		$this->assertEquals(3, count($this->messages->get()['info']));
 	}
 	
 	public function testGetAllFormattedMessages()
@@ -122,19 +139,19 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		
 		$output_should_be = '<div class="alert alert-danger"><ul><li>foo</li><li>bar</li><li>baz</li></ul></div><div class="alert alert-info"><ul><li>bip</li><li>bap</li><li>bop</li></ul></div>';
 		
-		$this->assertTrue(is_string($this->messages->getFormattedMessages()));
-		$this->assertEquals($output_should_be, $this->messages->getFormattedMessages());
+		$this->assertTrue(is_string($this->messages->getFormatted()));
+		$this->assertEquals($output_should_be, $this->messages->getFormatted());
 	}
 	
-	public function testNestingGetMessages()
+	public function testNestingget()
 	{
 		$messages = ['foo', 'bar', 'baz' => ['bip', 'bap', 'bop']];
 		$this->messages->error($messages);
 		
-		$this->assertTrue(is_array($this->messages->getMessages('error')));
-		$this->assertTrue(is_array($this->messages->getMessages('error')['baz']));
-		$this->assertEquals('bip', $this->messages->getMessages('error')['baz'][0]);
-		$this->assertEquals('bap', $this->messages->getMessages('error')['baz'][1]);
+		$this->assertTrue(is_array($this->messages->get('error')));
+		$this->assertTrue(is_array($this->messages->get('error')['baz']));
+		$this->assertEquals('bip', $this->messages->get('error')['baz'][0]);
+		$this->assertEquals('bap', $this->messages->get('error')['baz'][1]);
 	}
 	
 	public function testNestingGetFomattedMessages()
@@ -142,11 +159,11 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		$messages = ['foo', 'bar', 'baz' => ['bip', 'bap', 'bop']];
 		$this->messages->error($messages);
 		
-		$this->assertTrue(is_string($this->messages->getFormattedMessages('error')));
-		$this->assertEquals('<div class="alert alert-danger"><ul><li>foo</li><li>bar</li><li>baz<ul><li>bip</li><li>bap</li><li>bop</li></ul></li></ul></div>', $this->messages->getFormattedMessages('error'));
+		$this->assertTrue(is_string($this->messages->getFormatted('error')));
+		$this->assertEquals('<div class="alert alert-danger"><ul><li>foo</li><li>bar</li><li>baz<ul><li>bip</li><li>bap</li><li>bop</li></ul></li></ul></div>', $this->messages->getFormatted('error'));
 	}
 	
-	private function setSession($sess_id = NULL)
+	private function resetSession($sess_id = NULL)
 	{
 		$this->session = null; unset($this->session);
 		$this->session = new Session(new MockFileSessionStorage(), null, new AutoExpireFlashBag());
