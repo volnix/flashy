@@ -9,7 +9,7 @@ use \InvalidArgumentException;
 class Messages {
 	
 	public $session	= null;
-	private $flash	= null;
+	private $messages = [];
 	
 	const SESSION_INDEX		= "_flashy_messages";
 	
@@ -92,7 +92,7 @@ class Messages {
 		} elseif (is_string($message)) {
 			$this->messages[$type][] = $message;
 		} else {
-			throw new InvalidArgumentException(sprintf("Message must be an array or string.  '%s' given.", gettype($message[0])));
+			throw new InvalidArgumentException(sprintf("Message must be an array or string.  '%s' given.", gettype($message)));
 		}
 	}
 	
@@ -142,7 +142,7 @@ class Messages {
 			$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
 		}
 		
-		$this->flash_data = $this->session->getFlashBag()->get(self::SESSION_INDEX);
+		$this->messages = $this->session->getFlashBag()->get(self::SESSION_INDEX);
 	}
 	
 	/**
