@@ -148,7 +148,7 @@ echo $messages->getFormatted('error');
 
 will yield:
 ```html
-<div class="bip">
+<div class="alert alert-danger">
 	<ul>
 		<li>foo</li>
 		<li>
