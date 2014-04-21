@@ -7,21 +7,41 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use \InvalidArgumentException;
 
 class Messages {
-	
+
 	public $session	= null;
 	private $messages = [];
-	
+
 	const SESSION_INDEX		= "_flashy_messages";
-	
-	public function __construct()
+
+	/**
+	 * Constructor.
+	 *
+	 * @param \Volnix\Flashy\Symfony\Component\HttpFoundation\Session\SessionInterface $session
+	 */
+	public function __construct(Symfony\Component\HttpFoundation\Session\SessionInterface $session = null)
 	{
-		$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
+		$this->setSession($session);
+	}
+
+	/**
+	 * Configure our session.
+	 *
+	 * @param \Volnix\Flashy\Symfony\Component\HttpFoundation\Session\SessionInterface $session
+	 */
+	public function setSession(Symfony\Component\HttpFoundation\Session\SessionInterface $session = null)
+	{
+		if (empty($session)) {
+			$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
+		} else {
+			$this->session = $session;
+		}
+
 		$this->messages = $this->session->getFlashBag()->get(self::SESSION_INDEX);
 	}
-	
+
 	/**
 	 * Return an ul of the messages for a given type.  Optionally pass in a class override array if you want to use custom classes.  Otherwise will default to bootstrap 3 classes.
-	 * 
+	 *
 	 * @access public
 	 * @param string $type (default: "")
 	 * @param mixed $class (default: [])
@@ -30,33 +50,33 @@ class Messages {
 	public function getFormatted($type = "", $classes = [])
 	{
 		$message_class = !empty($classes[$type]) ? $classes[$type] : sprintf('alert alert-%s', ($type == 'error' ? 'danger' : htmlspecialchars($type)));
-		
+
 		if (!empty($type) && is_array($this->get($type)) && count($this->get($type)) > 0) {
-			
+
 			$message_content = sprintf('<div class="%s">', $message_class);
 			$message_content .= $this->ul($this->get($type));
 			$message_content .= '</div>';
 			return $message_content;
-			
+
 		} elseif (empty($type) && is_array($this->get()) && count($this->get()) > 0) {
-			
+
 			// iterate through the message types, calling this function recursively
 			$messages = "";
 			foreach (array_keys($this->get()) as $msg_type) {
 				$messages .= $this->getFormatted($msg_type);
 			}
 			return $messages;
-			
+
 		} else {
 			return "";
 		}
 	}
-	
+
 	/**
 	 * Get messages
 	 *
 	 * If type is not specified, this will return all messages.  If so, then it will return just the type.  If a non-existent message type is requested, an empty array will be returned.
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $type (default: NULL)
 	 * @return void
@@ -71,10 +91,10 @@ class Messages {
 			return $this->messages[$type];
 		}
 	}
-	
+
 	/**
 	 * Generic setter function.
-	 * 
+	 *
 	 * @access private
 	 * @param string $type (default: "")
 	 * @param string $message (default: "")
@@ -89,13 +109,13 @@ class Messages {
 		} else {
 			throw new InvalidArgumentException(sprintf("Message must be an array or string.  '%s' given.", gettype($message)));
 		}
-		
+
 		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->messages);
 	}
-	
+
 	/**
 	 * Allow setting as array where [type => messages].
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $data (default: [])
 	 * @return void
@@ -108,10 +128,10 @@ class Messages {
 			}
 		}
 	}
-	
+
 	/**
 	 * Empty our form data.  This is primarily used for unit testing.
-	 * 
+	 *
 	 * @access public
 	 * @return void
 	 */
@@ -119,10 +139,10 @@ class Messages {
 	{
 		$this->messages = [];
 	}
-	
+
 	/**
 	 * Call magic method is merely a way to access setMessages.
-	 * 
+	 *
 	 * @access public
 	 * @param string $type (default: "")
 	 * @param string $message (default: "")
@@ -132,8 +152,8 @@ class Messages {
 	{
 		$this->set($type, $message[0]);
 	}
-	
-	
+
+
 	private function ul($data = [])
 	{
 		$ul = '<ul>';

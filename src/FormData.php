@@ -7,21 +7,30 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 use \InvalidArgumentException;
 
 class FormData {
-	
+
 	public $session	= null;
 	private $flash_data	= [];
-	
+
 	const SESSION_INDEX		= "_flashy_form_data";
-	
-	public function __construct($session = null)
+
+	public function __construct(Symfony\Component\HttpFoundation\Session\SessionInterface $session = null)
 	{
-		$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
+		$this->setSession($session);
+	}
+
+	public function setSession(Symfony\Component\HttpFoundation\Session\SessionInterface $session = null)
+	{
+		if (empty($session)) {
+			$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
+		} else {
+			$this->session = $session;
+		}
+
 		$this->flash_data = $this->session->getFlashBag()->get(self::SESSION_INDEX);
 	}
-	
 	/**
-	 * Retrive the key being asked for.  If no data is contained in that key, then return the default.
-	 * 
+	 * Retrieve the key being asked for.  If no data is contained in that key, then return the default.
+	 *
 	 * @access public
 	 * @param string $key (default: "")
 	 * @param string $default (default: "")
@@ -38,12 +47,12 @@ class FormData {
 			return $default;
 		}
 	}
-	
+
 	/**
 	 * Set form data.
 	 *
 	 * The key can be an array, in which case it will set the key as the form data, or it can be scalar in which case it will set data to the key
-	 * 
+	 *
 	 * @access public
 	 * @param mixed $key
 	 * @param mixed $data (default: "")
@@ -58,13 +67,13 @@ class FormData {
 		} else {
 			throw new InvalidArgumentException(sprintf("Message must be an array or string.  '%s' given.", gettype($message)));
 		}
-		
+
 		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->flash_data);
 	}
-	
+
 	/**
 	 * Clear our form data.  This is primarily used for unit testing.
-	 * 
+	 *
 	 * @access public
 	 * @return void
 	 */
