@@ -16,9 +16,9 @@ class Messages {
 	/**
 	 * Constructor.
 	 *
-	 * @param \Volnix\Flashy\Symfony\Component\HttpFoundation\Session\SessionInterface $session
+	 * @param SessionInterface $session
 	 */
-	public function __construct(Symfony\Component\HttpFoundation\Session\SessionInterface $session = null)
+	public function __construct(SessionInterface $session = null)
 	{
 		$this->setSession($session);
 	}
@@ -26,9 +26,9 @@ class Messages {
 	/**
 	 * Configure our session.
 	 *
-	 * @param \Volnix\Flashy\Symfony\Component\HttpFoundation\Session\SessionInterface $session
+	 * @param SessionInterface $session
 	 */
-	public function setSession(Symfony\Component\HttpFoundation\Session\SessionInterface $session = null)
+	public function setSession(SessionInterface $session = null)
 	{
 		if (empty($session)) {
 			$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
