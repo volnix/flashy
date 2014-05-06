@@ -2,7 +2,7 @@
 
 Simple wrapper around [Symfony's Session](http://symfony.com/doc/current/components/http_foundation/sessions.html) flashbag.
 
-[![Build Status](https://travis-ci.org/volnix/flashy.png?branch=master)](https://travis-ci.org/volnix/flashy) [![Total Downloads](https://poser.pugx.org/volnix/flashy/downloads.png)](https://packagist.org/packages/volnix/flashy) [![Latest Stable Version](https://poser.pugx.org/volnix/flashy/v/stable.png)](https://packagist.org/packages/volnix/flashy)
+[![Build Status](https://travis-ci.org/volnix/flashy.png?branch=master)](https://travis-ci.org/volnix/flashy) [![Coverage Status](https://coveralls.io/repos/volnix/flashy/badge.png)](https://coveralls.io/r/volnix/flashy) [![Total Downloads](https://poser.pugx.org/volnix/flashy/downloads.png)](https://packagist.org/packages/volnix/flashy) [![Latest Stable Version](https://poser.pugx.org/volnix/flashy/v/stable.png)](https://packagist.org/packages/volnix/flashy)
 
 There are two pieces to flashy: [Prefill Data](#prefill) and [Messages](#messages).
 

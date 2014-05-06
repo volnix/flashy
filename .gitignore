@@ -1,5 +1,4 @@
-._*
-~$*
+vendor/
+composer.lock
+build/
 .DS*
-#Current.iim
-**/.git
