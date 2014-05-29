@@ -85,7 +85,7 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('foo', (new Session)->get(Messages::SESSION_INDEX)['error'][0]);
 
 		$this->messages->clear(true);
-		$this->assertNotEquals('foo', (new Session)->get(Messages::SESSION_INDEX)['error'][0]);
+		$this->assertFalse((new Session)->has(Messages::SESSION_INDEX));
 	}
 
 	public function testGetFormattedSimple()
