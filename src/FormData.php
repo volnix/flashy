@@ -2,7 +2,6 @@
 
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use InvalidArgumentException;
 
 class FormData {
 
@@ -86,7 +85,7 @@ class FormData {
 	{
 		if (empty($key)) {
 			$flashes = $this->flash_data;
-			unset($this->flash_data);
+			$this->clear();
 			return $flashes;
 		} elseif (isset($this->flash_data[$key])) {
 			$flash = $this->flash_data[$key];

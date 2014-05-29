@@ -9,6 +9,7 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 
 	public function __construct()
 	{
+		error_reporting(E_ALL);
 		ob_start();
 	}
 
@@ -20,11 +21,6 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 	public function setUp()
 	{
 		$this->form_data = new FormData;
-	}
-
-	public function tearDown()
-	{
-		unset($this->form_data);
 	}
 
 	public function testSetFormDataSetValueString()

@@ -9,6 +9,7 @@ class MessagesTests extends \PHPUnit_Framework_TestCase {
 
 	public function __construct()
 	{
+		error_reporting(E_ALL);
 		ob_start();
 	}
 

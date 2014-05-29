@@ -85,14 +85,14 @@ class Messages {
 	{
 		$message_class = !empty($classes[$type]) ? $classes[$type] : sprintf('alert alert-%s', ($type == 'error' ? 'danger' : htmlspecialchars($type)));
 
-		if (!empty($type) && is_array($this->messages[$type]) && count($this->messages[$type]) > 0) {
+		if (!empty($type) && isset($this->messages[$type]) && is_array($this->messages[$type]) && count($this->messages[$type]) > 0) {
 
 			$message_content = sprintf('<div class="%s">', $message_class);
 			$message_content .= $this->ul($this->get($type));
 			$message_content .= '</div>';
 			return $message_content;
 
-		} elseif (empty($type) && is_array($this->messages) && count($this->messages) > 0) {
+		} elseif (empty($type) && isset($this->messages) && is_array($this->messages) && count($this->messages) > 0) {
 
 			// iterate through the message types, calling this function recursively
 			$messages = "";
