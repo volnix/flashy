@@ -2,47 +2,96 @@
 
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpFoundation\Session\Flash\AutoExpireFlashBag;
-use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
-use \InvalidArgumentException;
+use InvalidArgumentException;
 
 class FormData {
 
-	public $session	= null;
-	private $flash_data	= [];
+	private $session    = null;
+	private $flash_data = [];
 
-	const SESSION_INDEX		= "_flashy_form_data";
+	const SESSION_INDEX		= "_flashy_form_65df6aa59e";
 
-	public function __construct(SessionInterface $session = null)
-	{
-		$this->setSession($session);
-	}
-
-	public function setSession(SessionInterface $session = null)
-	{
-		if (empty($session)) {
-			$this->session = (new Session((new NativeSessionStorage), null, (new AutoExpireFlashBag)));
-		} else {
-			$this->session = $session;
-		}
-
-		$this->flash_data = $this->session->getFlashBag()->get(self::SESSION_INDEX);
-	}
 	/**
-	 * Retrieve the key being asked for.  If no data is contained in that key, then return the default.
+	 * Constructor
+	 *
+	 * You may override the generic session library with a custom one if you desire
 	 *
 	 * @access public
-	 * @param string $key (default: "")
-	 * @param string $default (default: "")
+	 * @param SessionInterface $session A custom session object adhering to Symfony\Component\HttpFoundation\Session\SessionInterface
+	 */
+	public function __construct(SessionInterface $session = null)
+	{
+		if (!empty($session)) {
+			$this->session = $session;
+		} else {
+			$this->session = new Session;
+		}
+
+		if ($this->session->has(self::SESSION_INDEX)) {
+			$this->flash_data = $this->session->get(self::SESSION_INDEX);
+			$this->session->remove(self::SESSION_INDEX);
+		} else {
+			$this->flash_data =  [];
+		}
+	}
+
+	/**
+	 * Destructor
+	 *
+	 * @access public
+	 */
+	public function __destruct()
+	{
+		$this->saveData();
+	}
+
+	/**
+	 * Save the data to session
+	 *
+	 * @access public
 	 * @return void
+	 */
+	public function saveData()
+	{
+		$this->session->remove(self::SESSION_INDEX);
+		$this->session->set(self::SESSION_INDEX, $this->flash_data);
+	}
+
+	/**
+	 * Clear the flash dump
+	 *
+	 * @access public
+	 * @param bool $clear_session Clear the session too
+	 * @return void
+	 */
+	public function clear($clear_session = false)
+	{
+		$this->flash_data = [];
+
+		if ($clear_session === true) {
+			$this->session->remove(self::SESSION_INDEX);
+		}
+	}
+
+	/**
+	 * Get Flashes
+	 *
+	 * If key is not specified, this will return all flashes.  If so, then it will return just the key.  If a non-existent key is requested, it will use the default
+	 *
+	 * @param string $key
+	 * @param string $default
+	 * @return array|string
 	 */
 	public function get($key = "", $default = "")
 	{
-		// no key, so return all the flash data
 		if (empty($key)) {
-			return $this->flash_data;
+			$flashes = $this->flash_data;
+			unset($this->flash_data);
+			return $flashes;
 		} elseif (isset($this->flash_data[$key])) {
-			return $this->flash_data[$key];
+			$flash = $this->flash_data[$key];
+			unset($this->flash_data[$key]);
+			return $flash;
 		} else {
 			return $default;
 		}
@@ -53,32 +102,18 @@ class FormData {
 	 *
 	 * The key can be an array, in which case it will set the key as the form data, or it can be scalar in which case it will set data to the key
 	 *
-	 * @access public
-	 * @param mixed $key
-	 * @param mixed $data (default: "")
-	 * @return void
+	 * @param $key
+	 * @param string $data
+	 * @return $this Useful for method chaining
 	 */
 	public function set($key, $data = "")
 	{
 		if (is_array($key)) {
 			$this->flash_data = $key;
-		} elseif (is_string($data)) {
-			$this->flash_data[$key] = $data;
 		} else {
-			throw new InvalidArgumentException(sprintf("Message must be an array or string.  '%s' given.", gettype($message)));
+			$this->flash_data[$key] = $data;
 		}
 
-		$this->session->getFlashBag()->set(self::SESSION_INDEX, $this->flash_data);
-	}
-
-	/**
-	 * Clear our form data.  This is primarily used for unit testing.
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function clear()
-	{
-		$this->set([]);
+		return $this;
 	}
 }
