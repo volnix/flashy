@@ -1,6 +1,5 @@
 <?php namespace Volnix\Flashy\Tests;
 
-use Symfony\Component\HttpFoundation\Session\Session;
 use Volnix\Flashy\FormData;
 
 class FormDataTests extends \PHPUnit_Framework_TestCase {
@@ -23,6 +22,13 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 		$this->form_data = new FormData;
 	}
 
+	public function testConstructorSet()
+	{
+		unset($this->form_data);
+		$this->form_data = new FormData(['foo' => 'bar']);
+		$this->assertEquals('bar', $this->form_data->get('foo'));
+	}
+
 	public function testSetFormDataSetValueString()
 	{
 		$this->form_data->set('foo', 'bar');
@@ -37,24 +43,6 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('bar', $this->form_data->get('foo'));
 	}
 
-	public function testSetFormDataSetValueNewSession()
-	{
-		unset($this->form_data);
-		$this->form_data = new FormData(new Session);
-
-		$this->form_data->set('foo', 'bar');
-		$this->assertEquals('bar', $this->form_data->get('foo'));
-	}
-
-	public function testGetFormDataClearsValue()
-	{
-		$data = ['foo' => 'bar'];
-		$this->form_data->set($data);
-
-		$this->assertEquals('bar', $this->form_data->get('foo'));
-		$this->assertNotEquals('bar', $this->form_data->get('foo'));
-	}
-
 	public function testGetFormDataDefaultValue()
 	{
 		$data = ['foo' => 'bar'];
@@ -66,9 +54,9 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 	public function testSetFormValueMethodChaining()
 	{
 		$data = ['foo' => 'bar'];
-		$this->form_data->set($data)->saveData();
+		$value = $this->form_data->set($data)->get('foo');
 
-		$this->assertEquals('bar', $this->form_data->get('foo'));
+		$this->assertEquals('bar', $value);
 	}
 
 	public function testClear()
@@ -83,20 +71,6 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 		$this->assertNotEquals('bar', $this->form_data->get('foo'));
 	}
 
-	public function testClearSession()
-	{
-		$data = ['foo' => 'bar'];
-		$this->form_data->set($data);
-		$this->assertEquals('bar', $this->form_data->get('foo'));
-
-		$data = ['foo' => 'bar'];
-		$this->form_data->set($data)->saveData();
-		$this->assertEquals('bar', (new Session)->get(FormData::SESSION_INDEX)['foo']);
-		$this->form_data->clear(true);
-		$this->assertNotEquals('bar', $this->form_data->get('foo'));
-		$this->assertNotEquals('bar', (new Session)->get(FormData::SESSION_INDEX)['foo']);
-	}
-
 	public function testGetAll()
 	{
 		$data = ['foo' => 'bar', 'biz' => 'baz'];
@@ -108,25 +82,22 @@ class FormDataTests extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('baz', $output['biz']);
 	}
 
-	public function testSetFormDataSetValueMultiRequest()
+	public function testStringEscape()
 	{
-		// request starts
-		$data = ['foo' => 'bar'];
-		$this->form_data->set($data);
+		$data = "<script>alert('xss');</script>";
+		$this->assertEquals(htmlspecialchars($data), $this->form_data->escape($data));
+	}
 
-		// request ends
-		unset($this->form_data);
+	public function testArrayEscape()
+	{
+		$data = ['foo' => "<script>alert('xss');</script>"];
+		$this->assertEquals(htmlspecialchars($data['foo']), $this->form_data->escape($data)['foo']);
+	}
 
-		// request restarts
-		$this->form_data = new FormData;
-		$this->assertEquals('bar', $this->form_data->get('foo'));
-
-		// request ends
-		unset($this->form_data);
-
-		//request starts agains
-		$this->form_data = new FormData;
-		$this->assertNotEquals('bar', $this->form_data->get('foo'));
-		$this->assertEquals("", $this->form_data->get('foo'));
+	public function testGetWithEscape()
+	{
+		$data = "<script>alert('xss');</script>";
+		$this->assertEquals($data, $this->form_data->set('foo', $data)->get('foo'));
+		$this->assertEquals(htmlspecialchars($data), $this->form_data->set('foo', $data)->get('foo', null, true));
 	}
 }

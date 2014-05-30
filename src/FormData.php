@@ -1,14 +1,9 @@
 <?php namespace Volnix\Flashy;
 
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class FormData {
 
-	private $session    = null;
 	private $flash_data = [];
-
-	const SESSION_INDEX		= "_flashy_form_65df6aa59e";
 
 	/**
 	 * Constructor
@@ -16,60 +11,24 @@ class FormData {
 	 * You may override the generic session library with a custom one if you desire
 	 *
 	 * @access public
-	 * @param SessionInterface $session A custom session object adhering to Symfony\Component\HttpFoundation\Session\SessionInterface
+	 * @param $data array The data to initialize the form flash dump with
 	 */
-	public function __construct(SessionInterface $session = null)
+	public function __construct($data = [])
 	{
-		if (!empty($session)) {
-			$this->session = $session;
-		} else {
-			$this->session = new Session;
+		if (!empty($data)) {
+			$this->set($data);
 		}
-
-		if ($this->session->has(self::SESSION_INDEX)) {
-			$this->flash_data = $this->session->get(self::SESSION_INDEX);
-			$this->session->remove(self::SESSION_INDEX);
-		} else {
-			$this->flash_data =  [];
-		}
-	}
-
-	/**
-	 * Destructor
-	 *
-	 * @access public
-	 */
-	public function __destruct()
-	{
-		$this->saveData();
-	}
-
-	/**
-	 * Save the data to session
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function saveData()
-	{
-		$this->session->remove(self::SESSION_INDEX);
-		$this->session->set(self::SESSION_INDEX, $this->flash_data);
 	}
 
 	/**
 	 * Clear the flash dump
 	 *
 	 * @access public
-	 * @param bool $clear_session Clear the session too
 	 * @return void
 	 */
-	public function clear($clear_session = false)
+	public function clear()
 	{
 		$this->flash_data = [];
-
-		if ($clear_session === true) {
-			$this->session->remove(self::SESSION_INDEX);
-		}
 	}
 
 	/**
@@ -77,23 +36,39 @@ class FormData {
 	 *
 	 * If key is not specified, this will return all flashes.  If so, then it will return just the key.  If a non-existent key is requested, it will use the default
 	 *
-	 * @param string $key
-	 * @param string $default
+	 * @param string $key The key to retrieve, leave blank to get all data
+	 * @param string $default The default to use if the key isn't defined
+	 * @param bool $escape Whether or not to escape the data
 	 * @return array|string
 	 */
-	public function get($key = "", $default = "")
+	public function get($key = "", $default = "", $escape = false)
 	{
 		if (empty($key)) {
-			$flashes = $this->flash_data;
-			$this->clear();
-			return $flashes;
+			return $escape ? $this->escape($this->flash_data) : $this->flash_data;
 		} elseif (isset($this->flash_data[$key])) {
-			$flash = $this->flash_data[$key];
-			unset($this->flash_data[$key]);
-			return $flash;
+			return $escape ? $this->escape($this->flash_data[$key]) : $this->flash_data[$key];
 		} else {
-			return $default;
+			return $escape ? $this->escape($default) : $default;
 		}
+	}
+
+	/**
+	 * Function to (recursively) escape data if desired
+	 *
+	 * @param string $data
+	 * @return array|string
+	 */
+	public function escape($data = "")
+	{
+		if (is_array($data)) {
+			foreach ($data as $key => $value) {
+				$data[$key] = $this->escape($value);
+			}
+		} else {
+			$data = htmlspecialchars($data);
+		}
+
+		return $data;
 	}
 
 	/**
