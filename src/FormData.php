@@ -3,7 +3,7 @@
 
 class FormData {
 
-	private $flash_data = [];
+	public $flash_data = [];
 
 	/**
 	 * Constructor
