@@ -6,8 +6,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Messages {
 
-	private $session    = null;
-	private $messages   = [];
+	public $session    = null;
+	public $messages   = [];
 
 	const SESSION_INDEX = "_flashy_messages_65df6aa59e";
 
