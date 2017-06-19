@@ -19,7 +19,7 @@
 	"require": {
 		"php": ">= 5.4",
 		"symfony/http-foundation": "2.5.*@dev",
-		"satooshi/php-coveralls": "dev-master"
+		"satooshi/php-coveralls": "0.7.0"
 	},
 
 	"require-dev": {
